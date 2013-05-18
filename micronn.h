@@ -36,6 +36,8 @@ uint micronn_matrix_write(micronn_matrix*, FILE*);
 micronn_matrix* micronn_matrix_read(FILE*);
 micronn_matrix* micronn_matrix_dot(cublasHandle_t, char, char, float, micronn_matrix*, micronn_matrix*, float);
 uint micronn_matrix_add_ones(micronn_matrix*);
+uint micronn_matrix_add_row(micronn_matrix*, float*);
+uint micronn_matrix_memcpy(micronn_matrix*, float*);
 uint micronn_matrix_sigmoid(micronn_matrix*);
 
 micronn* micronn_init(uint, uint, uint, ...);
