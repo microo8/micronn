@@ -1,0 +1,12 @@
+*.swp
+*.swo
+*~
+__*__
+*.txt
+*.css
+*.so
+*.pyc
+*.py
+*.pyo
+*.dot
+*.tar.gz
