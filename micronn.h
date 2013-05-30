@@ -15,7 +15,6 @@
 typedef struct {
     uint rows;
     uint cols;
-    float* vals;
     float* devPtrvals;
 } micronn_matrix;
 
@@ -31,13 +30,15 @@ typedef struct {
 
 micronn_matrix* micronn_matrix_alloc(uint, uint);
 uint micronn_matrix_free(micronn_matrix*);
+micronn_matrix* micronn_matrix_copy(micronn_matrix*);
 uint micronn_matrix_rand(micronn_matrix*, float, float);
 uint micronn_matrix_write(micronn_matrix*, FILE*);
 micronn_matrix* micronn_matrix_read(FILE*);
 micronn_matrix* micronn_matrix_dot(cublasHandle_t, char, char, float, micronn_matrix*, micronn_matrix*, float);
 uint micronn_matrix_add_ones(micronn_matrix*);
 uint micronn_matrix_add_row(micronn_matrix*, float*);
-uint micronn_matrix_memcpy(micronn_matrix*, float*);
+float* micronn_matrix_get_vals(micronn_matrix*);
+uint micronn_matrix_set_vals(micronn_matrix*, float*);
 uint micronn_matrix_sigmoid(micronn_matrix*);
 
 micronn* micronn_init(uint, uint, uint, ...);
@@ -45,3 +46,4 @@ uint micronn_rand_weights(micronn*, float, float);
 uint micronn_free(micronn*);
 uint micronn_write(micronn*, FILE*);
 micronn* micronn_read(FILE*);
+micronn_matrix* micronn_forward(micronn*, micronn_matrix*);
