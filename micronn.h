@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <float.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
@@ -40,6 +41,11 @@ uint micronn_matrix_add_row(micronn_matrix*, float*);
 float* micronn_matrix_get_vals(micronn_matrix*);
 uint micronn_matrix_set_vals(micronn_matrix*, float*);
 uint micronn_matrix_sigmoid(micronn_matrix*);
+uint micronn_matrix_deriv_sigmoid(micronn_matrix*,micronn_matrix*);
+uint micronn_matrix_add(micronn_matrix*, micronn_matrix*);
+uint micronn_matrix_sub(micronn_matrix*, micronn_matrix*);
+uint micronn_matrix_mul(micronn_matrix*, micronn_matrix*);
+uint micronn_matrix_div(micronn_matrix*, micronn_matrix*);
 
 micronn* micronn_init(uint, uint, uint, ...);
 uint micronn_rand_weights(micronn*, float, float);
@@ -47,3 +53,6 @@ uint micronn_free(micronn*);
 uint micronn_write(micronn*, FILE*);
 micronn* micronn_read(FILE*);
 micronn_matrix* micronn_forward(micronn*, micronn_matrix*);
+micronn_matrix** micronn_forward_all(micronn*, micronn_matrix*);
+float micronn_error(micronn*, micronn_matrix*, micronn_matrix*, micronn_matrix*);
+uint micronn_train(micronn*, micronn_matrix*, micronn_matrix*, float, float, uint, float, uint);

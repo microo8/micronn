@@ -163,6 +163,41 @@ uint micronn_matrix_sigmoid(micronn_matrix* w)
     return 1;
 };
 
+uint micronn_matrix_deriv_sigmoid(micronn_matrix* w, micronn_matrix* v)
+{
+    void micronn_matrix_deriv_sigmoid_kernel(micronn_matrix * w, micronn_matrix* v);
+    micronn_matrix_deriv_sigmoid_kernel(w,v);
+    return 1;
+};
+
+uint micronn_matrix_add(micronn_matrix* w, micronn_matrix* v)
+{
+    void micronn_matrix_add_kernel(micronn_matrix * w, micronn_matrix * v);
+    micronn_matrix_add_kernel(w, v);
+    return 1;
+};
+
+uint micronn_matrix_sub(micronn_matrix* w, micronn_matrix* v)
+{
+    void micronn_matrix_sub_kernel(micronn_matrix * w, micronn_matrix * v);
+    micronn_matrix_sub_kernel(w, v);
+    return 1;
+};
+
+uint micronn_matrix_mul(micronn_matrix* w, micronn_matrix* v)
+{
+    void micronn_matrix_mul_kernel(micronn_matrix * w, micronn_matrix * v);
+    micronn_matrix_mul_kernel(w, v);
+    return 1;
+};
+
+uint micronn_matrix_div(micronn_matrix* w, micronn_matrix* v)
+{
+    void micronn_matrix_div_kernel(micronn_matrix * w, micronn_matrix * v);
+    micronn_matrix_div_kernel(w, v);
+    return 1;
+};
+
 
 /*-------------------------micronn---------------------------*/
 micronn* micronn_init(uint inputs, uint outputs, uint hidden, ...)
@@ -288,7 +323,82 @@ micronn_matrix* micronn_forward(micronn* net, micronn_matrix* w)
         tmp = micronn_matrix_dot(net->handle, CUBLAS_OP_N, CUBLAS_OP_N, 1.0, output, net->weights[i], 0.0);
         micronn_matrix_free(output);
         output = tmp;
-	micronn_matrix_sigmoid(output);
+        micronn_matrix_sigmoid(output);
     }
     return output;
+};
+
+micronn_matrix** micronn_forward_all(micronn* net, micronn_matrix* w)
+{
+    uint i;
+    micronn_matrix* tmp;
+    micronn_matrix* output = micronn_matrix_copy(w);
+    micronn_matrix** result = malloc(sizeof(micronn_matrix*)*(net->nhidden+1));
+    for(i = 0; i <= net->nhidden; i++) {
+        micronn_matrix_add_ones(output);
+        tmp = micronn_matrix_dot(net->handle, CUBLAS_OP_N, CUBLAS_OP_N, 1.0, output, net->weights[i], 0.0);
+	if(i==0){
+        micronn_matrix_free(output);
+	}
+        output = tmp;
+        micronn_matrix_sigmoid(output);
+	result[i] = output;
+    }
+    return result;
+};
+
+float micronn_error(micronn* net, micronn_matrix* inputs, micronn_matrix* targets, micronn_matrix* o)
+{
+    micronn_matrix* output;
+   if(o == NULL){
+	  output = micronn_forward(net, inputs);
+	}else{
+		output = o;
+	}
+    micronn_matrix_sub(output, targets);
+    micronn_matrix_mul(output, output);
+    uint i, len = output->rows * output->cols;
+    float sum = 0.0;
+    float* vals = micronn_matrix_get_vals(output);
+    micronn_matrix_free(output);
+    for(i = 0; i < len; i++) {
+        sum += vals[i];
+    }
+    free(vals);
+    return sum;
+};
+
+uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets, float eta, float momentum, uint max_iters, float min_error, uint echo_iters)
+{
+    uint i,j;
+    float error = DBL_MAX;
+    micronn_matrix* delta, *ntargets;
+    micronn_matrix** outputs;
+    micronn_matrix** updatew = malloc(sizeof(micronn_matrix*)*(net->nhidden+1));
+    for(i = 0; i <= net->nhidden; i++) {
+	    float* vals = calloc(net->weights[i]->rows*net->weights[i]->cols, sizeof(float));
+	    updatew[i] = micronn_matrix_alloc(net->weights[i]->rows, net->weights[i]->cols);
+	    micronn_matrix_set_vals(updatew[i], vals);
+	    free(vals);
+    }
+
+    for(i = 0; i < max_iters && error > min_error; i++) {
+	    outputs = micronn_forward_all(net, inputs);
+        error = micronn_error(net, inputs, targets,outputs[net->nhidden]);
+        if(echo_iters != 0 && i % echo_iters == 0) {
+            printf("iteration %d\terror: %f\n", i, error);
+        }
+	
+        //deltao = (targets-self.outputs)*self.outputs*(1.0-self.outputs)
+	ntargets = micronn_matrix_copy(targets);
+		micronn_matrix_deriv_sigmoid(ntargets, outputs[j]);
+	for(j=net->nhidden; j>= 0; j--){
+		
+	}
+    }
+    for(i = 0; i <= net->nhidden; i++) {
+	    micronn_matrix_free(updatew[i]);
+    }
+    free(updatew);
+    return 1;
 };
