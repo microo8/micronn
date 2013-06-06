@@ -5,6 +5,7 @@ __*__
 *.txt
 *.css
 *.so
+*.o
 *.pyc
 *.py
 *.pyo
