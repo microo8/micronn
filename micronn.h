@@ -42,6 +42,7 @@ float* micronn_matrix_get_vals(micronn_matrix*);
 uint micronn_matrix_set_vals(micronn_matrix*, float*);
 uint micronn_matrix_sigmoid(micronn_matrix*);
 uint micronn_matrix_deriv_sigmoid(micronn_matrix*,micronn_matrix*);
+uint micronn_matrix_deriv2_sigmoid(micronn_matrix*,micronn_matrix*);
 uint micronn_matrix_add(micronn_matrix*, micronn_matrix*);
 uint micronn_matrix_sub(micronn_matrix*, micronn_matrix*);
 uint micronn_matrix_mul(micronn_matrix*, micronn_matrix*);

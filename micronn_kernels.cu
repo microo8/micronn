@@ -16,6 +16,14 @@ __global__ void deriv_sigmoid(uint N, float* targets, float* outputs)
     }
 }
 
+__global__ void deriv2_sigmoid(uint N, float* v, float* w)
+{
+    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if(idx < N) {
+        w[idx] = v[idx]*(1.0-v[idx])*w[idx];
+    }
+}
+
 __global__ void add(uint N, float* a, float* b)
 {
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -58,6 +66,13 @@ void micronn_matrix_sigmoid_kernel(micronn_matrix* w)
 }
 
 void micronn_matrix_deriv_sigmoid_kernel(micronn_matrix* w, micronn_matrix* v)
+{
+    uint block_size = 256;
+    uint n_blocks = (w->rows * w->cols) / block_size + ((w->rows * w->cols) % block_size == 0 ? 0 : 1);
+    deriv_sigmoid <<< n_blocks, block_size >>>(w->rows * w->cols, w->devPtrvals, v->devPtrvals);
+}
+
+void micronn_matrix_deriv2_sigmoid_kernel(micronn_matrix* w, micronn_matrix* v)
 {
     uint block_size = 256;
     uint n_blocks = (w->rows * w->cols) / block_size + ((w->rows * w->cols) % block_size == 0 ? 0 : 1);
