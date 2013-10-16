@@ -89,39 +89,17 @@ micronn_matrix* micronn_matrix_dot(cublasHandle_t handle, char transA, char tran
 
 uint micronn_matrix_add_ones(micronn_matrix* w)
 {
-    uint i;
+	uint i;
     cudaError_t cudaStat;
     float* vals = micronn_matrix_get_vals(w);
     cudaFree(w->devPtrvals);
-    w->cols++;
-    float* new_vals = malloc(sizeof(float) * w->rows * w->cols);
-    for(i = 0; i < w->rows; i++) {
-        memcpy(new_vals + (i * w->cols), vals + i * (w->cols - 1), sizeof(float) * (w->cols - 1));
-        new_vals[i * w->cols + w->cols - 1] = 1.0;
-    }
-    free(vals);
-    cudaStat = cudaMalloc((void**)&w->devPtrvals, sizeof(float) * w->rows * w->cols);
-    if(cudaStat != cudaSuccess) {
-        fprintf(stderr, "device memory allocation failed\n");
-        return 0;
-    }
-    micronn_matrix_set_vals(w, new_vals);
-    free(new_vals);
-    return 1;
-};
-
-uint micronn_matrix_add_row(micronn_matrix* w, float* row)
-{
-    cudaError_t cudaStat;
-    float* vals = micronn_matrix_get_vals(w);
-    cudaFree(w->devPtrvals);
-
     w->rows++;
     float* new_vals = malloc(sizeof(float) * w->rows * w->cols);
-    memcpy(new_vals, vals, sizeof(float) * (w->rows - 1) * w->cols);
+        memcpy(new_vals, vals, sizeof(float) * w->cols * (w->rows-1));
     free(vals);
-    memcpy(new_vals + (w->rows - 1)*w->cols, row, sizeof(float) * w->cols);
-
+	for(i=(w->rows-1)*w->cols; i< w->rows*w->cols;i++){
+		new_vals[i] = 1;
+	}
     cudaStat = cudaMalloc((void**)&w->devPtrvals, sizeof(float) * w->rows * w->cols);
     if(cudaStat != cudaSuccess) {
         fprintf(stderr, "device memory allocation failed\n");
@@ -261,13 +239,13 @@ micronn* micronn_init(uint inputs, uint outputs, uint hidden, ...)
 
     va_start(vl, hidden);
     net->chidden[0] = va_arg(vl, uint);
-    net->weights[0] = micronn_matrix_alloc(net->nin + 1, net->chidden[0]);
+    net->weights[0] = micronn_matrix_alloc(net->chidden[0], net->nin + 1);
 
     for(i = 1; i < hidden; i++) {
         net->chidden[i] = va_arg(vl, uint);
-        net->weights[i] = micronn_matrix_alloc(net->chidden[i - 1] + 1, net->chidden[i]);
+        net->weights[i] = micronn_matrix_alloc(net->chidden[i], net->chidden[i - 1] + 1);
     }
-    net->weights[hidden] = micronn_matrix_alloc(net->chidden[hidden - 1] + 1, net->nout);
+    net->weights[hidden] = micronn_matrix_alloc(net->nout, net->chidden[hidden - 1] + 1);
     va_end(vl);
 
     micronn_rand_weights(net, MINWEIGHT, MAXWEIGHT);
