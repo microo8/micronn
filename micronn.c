@@ -82,8 +82,10 @@ micronn_matrix* micronn_matrix_read(FILE* file)
 
 micronn_matrix* micronn_matrix_dot(cublasHandle_t handle, char transA, char transB, float alpha, micronn_matrix* v, micronn_matrix* w, float beta)
 {
-    micronn_matrix* x = micronn_matrix_alloc(v->rows, w->cols);
-    cublasSgemm(handle, transA, transB, v->rows, w->cols, v->cols, &alpha, v->devPtrvals, v->rows, w->devPtrvals, w->rows, &beta, x->devPtrvals, x->rows);
+    micronn_matrix* x = micronn_matrix_alloc(transA == CUBLAS_OP_N ? v->rows : v->cols, transB == CUBLAS_OP_N ? w->cols : w->rows);
+    cublasSgemm(handle, transA, transB,
+		transA == CUBLAS_OP_N ? v->rows : v->cols, transB == CUBLAS_OP_N ? w->cols : w->rows, transA == CUBLAS_OP_N ? v->cols : v->rows,
+		&alpha, v->devPtrvals, v->rows, w->devPtrvals, w->rows, &beta, x->devPtrvals, x->rows);
     return x;
 };
 
@@ -365,7 +367,7 @@ float micronn_error(micronn* net, micronn_matrix* inputs, micronn_matrix* target
 uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets, float eta, float momentum, uint max_iters, float min_error, uint echo_iters)
 {
     uint i, j;
-    float error = DBL_MAX;
+    float error = DBL_MAX, alpha=1.0, beta=0.0;
     micronn_matrix* tmp, * output;
     micronn_matrix** delta = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     micronn_matrix** grad = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
@@ -407,7 +409,9 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
         micronn_matrix_free(tmp);
         //other delta[i] = (W[i])'delta[i+1] * f'(z[i])
         for(j = net->nhidden - 1; j > 0; j--) {
-            delta[j] = micronn_matrix_dot(net->handle, CUBLAS_OP_T, CUBLAS_OP_N, 1.0, net->weights[j], delta[j + 1], 0.0);
+	    delta[j] = micronn_matrix_alloc(v->cols, w->cols);
+            cublasSgemm(net->handle, CUBLAS_OP_T, CUBLAS_OP_N, v->cols, w->cols, v->rows, &alpha, v->devPtrvals,
+			v->cols, w->devPtrvals, w->rows-(j==net->nhidden - 1 ? 0 : 1), &beta, x->devPtrvals, x->rows);
             tmp = micronn_matrix_alloc(a[j]->rows, a[j]->cols);
             micronn_matrix_deriv_sigmoid(a[j], tmp);
             micronn_matrix_mul(delta[j], tmp);
@@ -425,6 +429,16 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
             micronn_matrix_mul_scalar(grad[i], eta);
             micronn_matrix_add(net->weights[i], grad[i]);
         }
+
+	for(j=0;j<=net->nhidden;j++){
+	    micronn_matrix_free(a[j]);
+	}
+	for(j=1;j<=net->nhidden;j++){
+	    micronn_matrix_free(delta[j]);
+	}
+    }
+    for(i = 0; i <= net->nhidden; i++) {
+	micronn_matrix_free(grad[i]);
     }
     return 1;
 };
