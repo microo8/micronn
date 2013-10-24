@@ -380,10 +380,34 @@ float micronn_error(micronn* net, micronn_matrix* inputs, micronn_matrix* target
     return sum;
 };
 
+uint micronn_diff(micronn* net, micronn_matrix* inputs, micronn_matrix* targets, micronn_matrix* o)
+{
+    micronn_matrix* output;
+    if(o == NULL) {
+        output = micronn_forward(net, inputs);
+    } else {
+        output = micronn_matrix_copy(o);
+    }
+    micronn_matrix_round(output);
+    micronn_matrix_sub(output, targets);
+    micronn_matrix_mul(output, output);
+    uint i, len = output->rows * output->cols;
+    uint sum = 0;
+    float* vals = micronn_matrix_get_vals(output);
+    micronn_matrix_free(output);
+    for(i = 0; i < len; i++) {
+        if(vals[i] != 0) {
+            sum++;
+        }
+    }
+    free(vals);
+    return sum;
+};
+
 uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets, float eta, float momentum, uint max_iters, float min_error, uint echo_iters)
 {
     int j;
-    uint i;
+    uint i, diff;
     float error = DBL_MAX, alpha = 1.0, beta = 0.0;
     micronn_matrix* tmp;
     micronn_matrix** delta = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
@@ -413,7 +437,8 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
         //calculate error
         if(echo_iters != 0 && i % echo_iters == 0) {
             error = micronn_error(net, inputs, targets, a[net->nhidden + 1]);
-            printf("iteration %d\terror: %.10f\n", i, error);
+            diff = micronn_diff(net, inputs, targets, a[net->nhidden + 1]);
+            printf("iteration %d\terror: %.10f\tdiff: %d\n", i, error, diff);
         }
 
         //last delta = (a[last] - y) * f'(z[last])

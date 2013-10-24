@@ -60,4 +60,5 @@ micronn* micronn_read(FILE*);
 micronn_matrix* micronn_forward(micronn*, micronn_matrix*);
 micronn_matrix** micronn_forward_all(micronn*, micronn_matrix*);
 float micronn_error(micronn*, micronn_matrix*, micronn_matrix*, micronn_matrix*);
+uint micronn_diff(micronn*, micronn_matrix*, micronn_matrix*, micronn_matrix*);
 uint micronn_train(micronn*, micronn_matrix*, micronn_matrix*, float, float, uint, float, uint);
