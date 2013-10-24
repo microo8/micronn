@@ -10,8 +10,8 @@
 #include <cublas_v2.h>
 
 #define uint unsigned int
-#define MINWEIGHT -0.1
-#define MAXWEIGHT 0.1
+#define MINWEIGHT -0.3
+#define MAXWEIGHT 0.3
 
 typedef struct {
     uint rows;
@@ -50,6 +50,7 @@ uint micronn_matrix_add_scalar(micronn_matrix*, float);
 uint micronn_matrix_sub_scalar(micronn_matrix*, float);
 uint micronn_matrix_mul_scalar(micronn_matrix*, float);
 uint micronn_matrix_div_scalar(micronn_matrix*, float);
+uint micronn_matrix_round(micronn_matrix*);
 
 micronn* micronn_init(uint, uint, uint, ...);
 uint micronn_rand_weights(micronn*, float, float);

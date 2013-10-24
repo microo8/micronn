@@ -88,6 +88,14 @@ __global__ void set_val(uint N, float* a, float value)
     }
 }
 
+__global__ void round(uint N, float* a)
+{
+    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if(idx < N) {
+        a[idx] = round(a[idx]);
+    }
+}
+
 extern "C"
 {
 void micronn_matrix_sigmoid_kernel(micronn_matrix* w, micronn_matrix* v)
@@ -166,5 +174,12 @@ void micronn_matrix_set_val_kernel(micronn_matrix* w, float value)
     uint block_size = 256;
     uint n_blocks = (w->rows * w->cols) / block_size + ((w->rows * w->cols) % block_size == 0 ? 0 : 1);
     set_val <<< n_blocks, block_size >>>(w->rows * w->cols, w->devPtrvals, value);
+}
+
+void micronn_matrix_round_kernel(micronn_matrix* w)
+{
+    uint block_size = 256;
+    uint n_blocks = (w->rows * w->cols) / block_size + ((w->rows * w->cols) % block_size == 0 ? 0 : 1);
+    round <<< n_blocks, block_size >>>(w->rows * w->cols, w->devPtrvals);
 }
 }

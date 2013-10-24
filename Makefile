@@ -35,7 +35,7 @@ else
 endif
 
 # Common binaries
-NVCC            ?= $(CUDA_BIN_PATH)/nvcc
+NVCC            ?= nvcc
 GCC             ?= gcc
 GPP             ?= g++
 
@@ -103,7 +103,7 @@ nntest: nntest.o micronn.o micronn_kernels.o
 	$(GPP) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
 
 run: build
-	optirun ./nntest
+	./nntest
 
 clean:
 	rm -rf nntest *.o
