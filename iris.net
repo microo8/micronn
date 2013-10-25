@@ -1,25 +1,103 @@
 micro neural network
 ninputs: 4
 noutputs: 3
-nhidden 1
-chidden: 13
+nhidden 4
+chidden: 50 20 10 5
 weight 1:
-rows: 13 cols: 5
--9.6677646637e+00 -2.5834017992e-01 1.5547065735e+01 1.7467858791e+00 -7.2299652100e+00 
--4.4475002289e+01 -1.4155068398e+01 -1.4930698276e-01 5.7959064484e+01 1.7967154980e+00 
-8.5062246323e+00 -7.8998901367e+01 -5.6626415253e+00 6.1414837837e-02 3.8944232941e+01 
-8.2330808640e+00 7.3932356834e+00 -4.7806869507e+01 -1.2366167068e+01 6.2249302864e-02 
-1.5616708755e+01 1.1822816849e+01 1.0109893799e+01 -4.1116241455e+01 -8.2090883255e+00 
-4.0571627617e+00 2.0358043671e+01 -1.3126277924e-01 3.4276101589e+00 -7.0581954956e+01 
--3.4968764782e+00 7.1853437424e+00 3.8580176830e+00 -2.0253102779e+00 1.4501906395e+01 
--2.4252460003e+00 -2.8926974535e-01 -2.8731031418e+00 2.0778861046e+00 1.5733819962e+01 
--2.9992712021e+01 4.9445500374e+00 -7.3651371002e+00 -3.8025522232e+00 2.7050226212e+01 
-2.1657681465e+00 4.1464691162e+00 -1.2549773216e+01 -6.9319758415e+00 9.1900615692e+00 
--8.2145166397e+00 7.0185943604e+01 -5.7334285736e+01 -8.9976625443e+00 -1.8472063541e+00 
--2.0021395758e-02 -8.9329948425e+00 -5.1812927246e+01 -1.5051228523e+01 -3.9760816097e+00 
-3.7527687073e+01 -1.2278629541e+00 -7.0081219673e+00 2.5150779724e+01 -4.4243160248e+01 
+rows: 50 cols: 5
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
+nan nan nan nan nan 
 weight 2:
-rows: 3 cols: 14
-7.1103868484e+00 1.2898947716e+01 6.0813546181e+00 -2.6434037685e+00 -1.0194686651e+00 -2.6367635727e+00 3.8923126459e-01 2.1919076443e+00 -8.7150430679e+00 -2.5968011856e+01 -2.8187174797e+00 1.2713171244e+00 2.8753881454e+00 8.3522624969e+00 
--4.2566857338e+00 -1.2353591919e+01 -4.4969987869e+00 -6.1314277649e+00 -1.4415614128e+01 -6.2429456711e+00 -4.3324661255e+00 3.0602750182e-01 1.0976657867e+01 2.1407634735e+01 -1.1765995979e+01 1.0192668438e+00 1.9504188299e+00 -6.3248009682e+00 
--1.3105534315e+00 -2.3638880253e+00 2.5647211820e-02 4.1896758080e+00 7.4221549034e+00 3.1848552227e+00 1.7440677881e+00 -5.3016573191e-01 -1.3266444206e+00 -2.4572925568e+00 3.8704915047e+00 -2.1546256542e+00 -6.7026047707e+00 -5.1194567680e+00 
+rows: 20 cols: 51
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+weight 3:
+rows: 10 cols: 21
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
+weight 4:
+rows: 5 cols: 11
+nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan 
+nan nan nan nan nan nan nan nan nan nan nan 
+weight 5:
+rows: 3 cols: 6
+nan nan nan nan nan nan 
+nan nan nan nan nan nan 
+nan nan nan nan nan nan 

@@ -12,6 +12,7 @@
 #define uint unsigned int
 #define MINWEIGHT -0.3
 #define MAXWEIGHT 0.3
+#define block_size 1024
 
 typedef struct {
     uint rows;
@@ -37,6 +38,7 @@ uint micronn_matrix_write(micronn_matrix*, FILE*);
 micronn_matrix* micronn_matrix_read(FILE*);
 micronn_matrix* micronn_matrix_dot(cublasHandle_t, cublasOperation_t, cublasOperation_t, float, micronn_matrix*, micronn_matrix*, float);
 uint micronn_matrix_add_ones(micronn_matrix*);
+uint micronn_matrix_remove_last_row(micronn_matrix*);
 float* micronn_matrix_get_vals(micronn_matrix*);
 uint micronn_matrix_set_vals(micronn_matrix*, float*);
 uint micronn_matrix_set_val(micronn_matrix*, float);
@@ -61,4 +63,4 @@ micronn_matrix* micronn_forward(micronn*, micronn_matrix*);
 micronn_matrix** micronn_forward_all(micronn*, micronn_matrix*);
 float micronn_error(micronn*, micronn_matrix*, micronn_matrix*, micronn_matrix*);
 uint micronn_diff(micronn*, micronn_matrix*, micronn_matrix*, micronn_matrix*);
-uint micronn_train(micronn*, micronn_matrix*, micronn_matrix*, float, float, uint, float, uint);
+uint micronn_train(micronn*, micronn_matrix*, micronn_matrix*, uint, float, float, uint, float, uint);

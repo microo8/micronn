@@ -103,7 +103,7 @@ nntest: nntest.o micronn.o micronn_kernels.o
 	$(GPP) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
 
 run: build
-	./nntest
+	optirun ./nntest
 
 clean:
 	rm -rf nntest *.o

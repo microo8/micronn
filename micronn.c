@@ -24,10 +24,9 @@ uint micronn_matrix_free(micronn_matrix* w)
 
 micronn_matrix* micronn_matrix_copy(micronn_matrix* w)
 {
-    float* vals = micronn_matrix_get_vals(w);
     micronn_matrix* matrix = micronn_matrix_alloc(w->rows, w->cols);
-    micronn_matrix_set_vals(matrix, vals);
-    free(vals);
+    void micronn_matrix_copy_kernel(micronn_matrix * w, micronn_matrix * v);
+    micronn_matrix_copy_kernel(matrix, w);
     return matrix;
 };
 
@@ -105,6 +104,28 @@ uint micronn_matrix_add_ones(micronn_matrix* w)
     for(i = 0; i < w->cols; i++) {
         memcpy(new_vals + (i * w->rows), vals + (i * (w->rows - 1)), sizeof(float) * (w->rows - 1));
         new_vals[(i + 1) * w->rows - 1] = 1;
+    }
+    free(vals);
+    cudaStat = cudaMalloc((void**)&w->devPtrvals, sizeof(float) * w->rows * w->cols);
+    if(cudaStat != cudaSuccess) {
+        fprintf(stderr, "device memory allocation failed\n");
+        return 0;
+    }
+    micronn_matrix_set_vals(w, new_vals);
+    free(new_vals);
+    return 1;
+};
+
+uint micronn_matrix_remove_last_row(micronn_matrix* w)
+{
+    uint i;
+    cudaError_t cudaStat;
+    float* vals = micronn_matrix_get_vals(w);
+    cudaFree(w->devPtrvals);
+    w->rows--;
+    float* new_vals = malloc(sizeof(float) * w->rows * w->cols);
+    for(i = 0; i < w->cols; i++) {
+        memcpy(new_vals + (i * w->rows), vals + (i * (w->rows + 1)), sizeof(float) * w->rows);
     }
     free(vals);
     cudaStat = cudaMalloc((void**)&w->devPtrvals, sizeof(float) * w->rows * w->cols);
@@ -404,25 +425,38 @@ uint micronn_diff(micronn* net, micronn_matrix* inputs, micronn_matrix* targets,
     return sum;
 };
 
-uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets, float eta, float momentum, uint max_iters, float min_error, uint echo_iters)
+uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets, uint batch, float eta, float momentum, uint max_iters, float min_error, uint echo_iters)
 {
     int j;
-    uint i, diff;
+    uint i, index, diff;
     float error = DBL_MAX, alpha = 1.0, beta = 0.0;
-    micronn_matrix* tmp;
+    micronn_matrix* tmp, *inputss = micronn_matrix_copy(inputs), *y;
     micronn_matrix** delta = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     micronn_matrix** grad = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     micronn_matrix** a = malloc(sizeof(micronn_matrix*) * (net->nhidden + 2));
-    a[0] = inputs;
-    micronn_matrix_add_ones(a[0]);
     //micronn_matrix** z = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     //calloc grad
     for(i = 0; i <= net->nhidden; i++) {
         grad[i] = micronn_matrix_alloc(net->weights[i]->rows, net->weights[i]->cols);
         micronn_matrix_set_val(grad[i], 0.0);
     }
-
+    micronn_matrix_add_ones(inputs);
     for(i = 0; (max_iters == 0 || i < max_iters) && error > min_error; i++) {
+        if(batch == 0) {
+            a[0] = inputs;
+	    y = targets;
+        } else {
+		index = rand() % (inputs->cols - batch + 1);
+            a[0] = malloc(sizeof(micronn_matrix));
+            a[0]->rows = inputs->rows;
+            a[0]->cols = batch;
+            a[0]->devPtrvals = inputs->devPtrvals + index * inputs->rows;
+            y = malloc(sizeof(micronn_matrix));
+	    y->rows = targets->rows;
+	    y->cols = batch;
+	    y->devPtrvals = targets->devPtrvals + index * targets->rows;
+        }
+
         //forward and save the outputs of layers
         for(j = 0; j < net->nhidden + 1; j++) {
             if(j > 0) {
@@ -436,14 +470,14 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
 
         //calculate error
         if(echo_iters != 0 && i % echo_iters == 0) {
-            error = micronn_error(net, inputs, targets, a[net->nhidden + 1]);
-            diff = micronn_diff(net, inputs, targets, a[net->nhidden + 1]);
+            error = micronn_error(net, inputss, targets, NULL);//a[net->nhidden + 1]);
+            diff = micronn_diff(net, inputss, targets, NULL);//a[net->nhidden + 1]);
             printf("iteration %d\terror: %.10f\tdiff: %d\n", i, error, diff);
         }
 
         //last delta = (a[last] - y) * f'(z[last])
         delta[net->nhidden] = micronn_matrix_copy(a[net->nhidden + 1]);
-        micronn_matrix_sub(delta[net->nhidden], targets);
+        micronn_matrix_sub(delta[net->nhidden], y);
         tmp = micronn_matrix_alloc(a[net->nhidden + 1]->rows, a[net->nhidden + 1]->cols);
         micronn_matrix_deriv_sigmoid(a[net->nhidden + 1], tmp);
         micronn_matrix_mul(delta[net->nhidden], tmp);
@@ -469,10 +503,19 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
             micronn_matrix_free(grad[j]);
             grad[j] = micronn_matrix_dot(net->handle, CUBLAS_OP_N, CUBLAS_OP_T, 1.0, delta[j], a[j], 0.0);
             //new grad multiply with eta and add to weights
-            micronn_matrix_mul_scalar(grad[j], eta);
-            micronn_matrix_sub(net->weights[j], grad[j]);
+            if(j != net->nhidden) {
+                micronn_matrix_remove_last_row(grad[j]);
+            }
+            tmp = micronn_matrix_copy(grad[j]);
+            micronn_matrix_mul_scalar(tmp, eta / inputs->cols);
+            micronn_matrix_sub(net->weights[j], tmp);
+            micronn_matrix_free(tmp);
         }
 
+        if(batch != 0) {
+            free(a[0]);
+	    free(y);
+        }
         for(j = 1; j < net->nhidden + 2; j++) {
             micronn_matrix_free(a[j]);
         }
