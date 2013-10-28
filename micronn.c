@@ -444,17 +444,17 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
     for(i = 0; (max_iters == 0 || i < max_iters) && error > min_error; i++) {
         if(batch == 0) {
             a[0] = inputs;
-	    y = targets;
+            y = targets;
         } else {
-		index = rand() % (inputs->cols - batch + 1);
+            index = rand() % (inputs->cols - batch + 1);
             a[0] = malloc(sizeof(micronn_matrix));
             a[0]->rows = inputs->rows;
             a[0]->cols = batch;
             a[0]->devPtrvals = inputs->devPtrvals + index * inputs->rows;
             y = malloc(sizeof(micronn_matrix));
-	    y->rows = targets->rows;
-	    y->cols = batch;
-	    y->devPtrvals = targets->devPtrvals + index * targets->rows;
+            y->rows = targets->rows;
+            y->cols = batch;
+            y->devPtrvals = targets->devPtrvals + index * targets->rows;
         }
 
         //forward and save the outputs of layers
@@ -514,7 +514,7 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
 
         if(batch != 0) {
             free(a[0]);
-	    free(y);
+            free(y);
         }
         for(j = 1; j < net->nhidden + 2; j++) {
             micronn_matrix_free(a[j]);
@@ -527,4 +527,13 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
         micronn_matrix_free(grad[i]);
     }
     return 1;
+};
+
+uint micronn_train_from_file(micronn* net, const char* config_filename)
+{
+    struct collection_item* ini_config;
+    struct collection_item* error_list;
+    config_from_file("micronn", config_from_file, &ini_config, 0, &error_list);
+    free(error_list);
+    micronn_train(net, inputs, targets, uint batch, float eta, float momentum, uint max_iters, float min_error, uint echo_iters)
 };

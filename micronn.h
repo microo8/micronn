@@ -8,6 +8,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
+#include <ini_config.h>
 
 #define uint unsigned int
 #define MINWEIGHT -0.3
@@ -64,3 +65,4 @@ micronn_matrix** micronn_forward_all(micronn*, micronn_matrix*);
 float micronn_error(micronn*, micronn_matrix*, micronn_matrix*, micronn_matrix*);
 uint micronn_diff(micronn*, micronn_matrix*, micronn_matrix*, micronn_matrix*);
 uint micronn_train(micronn*, micronn_matrix*, micronn_matrix*, uint, float, float, uint, float, uint);
+uint micronn_train_from_file(micronn*, const char*);
