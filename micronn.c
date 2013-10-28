@@ -364,14 +364,21 @@ micronn* micronn_read(FILE* file)
 micronn_matrix* micronn_forward(micronn* net, micronn_matrix* w)
 {
     if(w->rows != net->nin) {
-        fprintf(stderr, "Input dimension is incorrect\n");
-        return NULL;
+        if(w->rows - 1 != net->nin) {
+            fprintf(stderr, "Input dimension is incorrect\n");
+            return NULL;
+        }
     }
     uint i;
     micronn_matrix* tmp;
     micronn_matrix* output = micronn_matrix_copy(w);
-    for(i = 0; i <= net->nhidden; i++) {
+    if(w->rows - 1 != net->nin) {
         micronn_matrix_add_ones(output);
+    }
+    for(i = 0; i <= net->nhidden; i++) {
+        if(i > 0) {
+            micronn_matrix_add_ones(output);
+        }
         tmp = micronn_matrix_dot(net->handle, CUBLAS_OP_N, CUBLAS_OP_N, 1.0, net->weights[i], output, 0.0);
         micronn_matrix_free(output);
         output = micronn_matrix_sigmoid(tmp);
@@ -390,7 +397,7 @@ float micronn_error(micronn* net, micronn_matrix* inputs, micronn_matrix* target
     }
     micronn_matrix_sub(output, targets);
     micronn_matrix_mul(output, output);
-    uint i, len = output->rows * output->cols;
+    uint i, len = output->rows * output->cols, num = output->cols;
     float sum = 0.0;
     float* vals = micronn_matrix_get_vals(output);
     micronn_matrix_free(output);
@@ -398,7 +405,7 @@ float micronn_error(micronn* net, micronn_matrix* inputs, micronn_matrix* target
         sum += vals[i];
     }
     free(vals);
-    return sum;
+    return sum / num;
 };
 
 uint micronn_diff(micronn* net, micronn_matrix* inputs, micronn_matrix* targets, micronn_matrix* o)
@@ -430,7 +437,7 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
     int j;
     uint i, index, diff;
     float error = DBL_MAX, alpha = 1.0, beta = 0.0;
-    micronn_matrix* tmp, *inputss = micronn_matrix_copy(inputs), *y;
+    micronn_matrix* tmp, *y;
     micronn_matrix** delta = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     micronn_matrix** grad = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     micronn_matrix** a = malloc(sizeof(micronn_matrix*) * (net->nhidden + 2));
@@ -470,8 +477,8 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
 
         //calculate error
         if(echo_iters != 0 && i % echo_iters == 0) {
-            error = micronn_error(net, inputss, targets, NULL);//a[net->nhidden + 1]);
-            diff = micronn_diff(net, inputss, targets, NULL);//a[net->nhidden + 1]);
+            error = micronn_error(net, inputs, targets, NULL);//a[net->nhidden + 1]);
+            diff = micronn_diff(net, inputs, targets, NULL);//a[net->nhidden + 1]);
             printf("iteration %d\terror: %.10f\tdiff: %d\n", i, error, diff);
         }
 
@@ -528,7 +535,7 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
     }
     return 1;
 };
-
+/*
 uint micronn_train_from_file(micronn* net, const char* config_filename)
 {
     struct collection_item* ini_config;
@@ -536,4 +543,4 @@ uint micronn_train_from_file(micronn* net, const char* config_filename)
     config_from_file("micronn", config_from_file, &ini_config, 0, &error_list);
     free(error_list);
     micronn_train(net, inputs, targets, uint batch, float eta, float momentum, uint max_iters, float min_error, uint echo_iters)
-};
+};*/
