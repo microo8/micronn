@@ -4,7 +4,7 @@ int main(int argc, char** argv)
 {
     FILE* f;
     printf("start\n");
-    micronn* net = micronn_init(784, 10, 4, 1200, 1000, 500, 50);
+    micronn* net = micronn_init(784, 10, 4, 1000, 500, 200, 50);
     printf("net initialized\n");
     f = fopen("train_images.data", "r");
     micronn_matrix* i = micronn_matrix_read(f);
@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     fclose(f);
     printf("targets loaded\n");
 
-    micronn_train(net, i, o, 1, 0.1, 0.05, 0, 0.05, 100);
+    micronn_train(net, i, o, 50, 0.3, 0.1, 0, 0.2, 100);
     micronn_matrix_free(i);
     micronn_matrix_free(o);
     f = fopen("mnist.net", "w");

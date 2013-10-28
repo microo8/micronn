@@ -20,7 +20,7 @@ __global__ void deriv_sigmoid(uint N, float* a, float* result)
 {
     uint idx = blockIdx.x * blockDim.x + threadIdx.x;
     if(idx < N) {
-        result[idx] = a[idx]*(1.0-a[idx]);
+        result[idx] = a[idx] * (1.0 - a[idx]);
     }
 }
 

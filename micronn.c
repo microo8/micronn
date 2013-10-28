@@ -79,8 +79,9 @@ micronn_matrix* micronn_matrix_read(FILE* file)
     return w;
 };
 
-micronn_matrix* micronn_matrix_dot(cublasHandle_t handle, cublasOperation_t transA, cublasOperation_t transB, float alpha, micronn_matrix* v, micronn_matrix* w, float beta)
+micronn_matrix* micronn_matrix_dot(cublasHandle_t handle, cublasOperation_t transA, cublasOperation_t transB, float alpha, micronn_matrix* v, micronn_matrix* w)
 {
+    float beta = 0.0;
     micronn_matrix* x = micronn_matrix_alloc(transA == CUBLAS_OP_N ? v->rows : v->cols,
                         transB == CUBLAS_OP_N ? w->cols : w->rows);
     cublasSgemm(handle, transA, transB,
@@ -371,16 +372,19 @@ micronn_matrix* micronn_forward(micronn* net, micronn_matrix* w)
     }
     uint i;
     micronn_matrix* tmp;
-    micronn_matrix* output = micronn_matrix_copy(w);
+    micronn_matrix* output = w;
     if(w->rows - 1 != net->nin) {
+        output = micronn_matrix_copy(w);
         micronn_matrix_add_ones(output);
     }
     for(i = 0; i <= net->nhidden; i++) {
         if(i > 0) {
             micronn_matrix_add_ones(output);
         }
-        tmp = micronn_matrix_dot(net->handle, CUBLAS_OP_N, CUBLAS_OP_N, 1.0, net->weights[i], output, 0.0);
-        micronn_matrix_free(output);
+        tmp = micronn_matrix_dot(net->handle, CUBLAS_OP_N, CUBLAS_OP_N, 1.0, net->weights[i], output);
+        if(i > 0) {
+            micronn_matrix_free(output);
+        }
         output = micronn_matrix_sigmoid(tmp);
         micronn_matrix_free(tmp);
     }
@@ -418,16 +422,20 @@ uint micronn_diff(micronn* net, micronn_matrix* inputs, micronn_matrix* targets,
     }
     micronn_matrix_round(output);
     micronn_matrix_sub(output, targets);
-    micronn_matrix_mul(output, output);
-    uint i, len = output->rows * output->cols;
+    uint i, j;
     uint sum = 0;
-    float* vals = micronn_matrix_get_vals(output);
-    micronn_matrix_free(output);
-    for(i = 0; i < len; i++) {
-        if(vals[i] != 0) {
-            sum++;
+    float wrong, *vals = micronn_matrix_get_vals(output);
+    for(i = 0; i < output->cols; i++) {
+        wrong = 0;
+        for(j = i * output->rows; j < (i + 1)*output->rows; j++) {
+            if(vals[j] != 0) {
+                wrong = 1;
+            }
         }
+        sum += wrong;
     }
+
+    micronn_matrix_free(output);
     free(vals);
     return sum;
 };
@@ -469,7 +477,7 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
             if(j > 0) {
                 micronn_matrix_add_ones(a[j]);
             }
-            tmp = micronn_matrix_dot(net->handle, CUBLAS_OP_N, CUBLAS_OP_N, 1.0, net->weights[j], a[j], 0.0);
+            tmp = micronn_matrix_dot(net->handle, CUBLAS_OP_N, CUBLAS_OP_N, 1.0, net->weights[j], a[j]);
             //z[j] = tmp;
             a[j + 1] = micronn_matrix_sigmoid(tmp);
             micronn_matrix_free(tmp);
@@ -497,26 +505,29 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
                         &alpha, net->weights[j + 1]->devPtrvals, net->weights[j + 1]->rows,
                         delta[j + 1]->devPtrvals, delta[j + 1]->rows,
                         &beta, delta[j]->devPtrvals, delta[j]->rows);
+            //delta[i] *= f'(z[i+1])
+            //micronn_matrix_deriv_sigmoid(a[j + 1], delta[j]);
+
             tmp = micronn_matrix_alloc(a[j + 1]->rows, a[j + 1]->cols);
             micronn_matrix_deriv_sigmoid(a[j + 1], tmp);
             micronn_matrix_mul(delta[j], tmp);
             micronn_matrix_free(tmp);
         }
-        //compute grad[i] = delta[i+1](a[i])' and add to weights[i] += eta*grad[i] (+momentum)
+        alpha = eta / inputs->cols;
+        //compute grad[i] = delta[i+1](a[i])' + momentum*grad[i] and add to weights[i] -= eta/N*grad[i]
         for(j = net->nhidden; j >= 0; j--) {
-            //multiply previous with momentum and add the momentum to weight
-            micronn_matrix_mul_scalar(grad[j], momentum);
-            micronn_matrix_sub(net->weights[j], grad[j]);
-            micronn_matrix_free(grad[j]);
-            grad[j] = micronn_matrix_dot(net->handle, CUBLAS_OP_N, CUBLAS_OP_T, 1.0, delta[j], a[j], 0.0);
-            //new grad multiply with eta and add to weights
-            if(j != net->nhidden) {
-                micronn_matrix_remove_last_row(grad[j]);
+            //delete the last row from deltas to have correct size of grad
+            if(j < net->nhidden) {
+                micronn_matrix_remove_last_row(delta[j]);
             }
-            tmp = micronn_matrix_copy(grad[j]);
-            micronn_matrix_mul_scalar(tmp, eta / inputs->cols);
-            micronn_matrix_sub(net->weights[j], tmp);
-            micronn_matrix_free(tmp);
+            cublasSgemm(net->handle, CUBLAS_OP_N, CUBLAS_OP_T,
+                        delta[j]->rows,
+                        a[j]->rows,
+                        a[j]->cols,
+                        &alpha, delta[j]->devPtrvals, delta[j]->rows,
+                        a[j]->devPtrvals, a[j]->rows, &momentum,
+                        grad[j]->devPtrvals, grad[j]->rows);
+            micronn_matrix_sub(net->weights[j], grad[j]);
         }
 
         if(batch != 0) {

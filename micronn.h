@@ -37,7 +37,7 @@ micronn_matrix* micronn_matrix_copy(micronn_matrix*);
 uint micronn_matrix_rand(micronn_matrix*, float, float);
 uint micronn_matrix_write(micronn_matrix*, FILE*);
 micronn_matrix* micronn_matrix_read(FILE*);
-micronn_matrix* micronn_matrix_dot(cublasHandle_t, cublasOperation_t, cublasOperation_t, float, micronn_matrix*, micronn_matrix*, float);
+micronn_matrix* micronn_matrix_dot(cublasHandle_t, cublasOperation_t, cublasOperation_t, float, micronn_matrix*, micronn_matrix*);
 uint micronn_matrix_add_ones(micronn_matrix*);
 uint micronn_matrix_remove_last_row(micronn_matrix*);
 float* micronn_matrix_get_vals(micronn_matrix*);
