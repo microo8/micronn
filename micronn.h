@@ -11,9 +11,9 @@
 //#include <ini_config.h>
 
 #define uint unsigned int
-#define MINWEIGHT -0.3
-#define MAXWEIGHT 0.3
-#define block_size 1024
+#define MINWEIGHT -0.2
+#define MAXWEIGHT 0.2
+#define block_size 512
 
 typedef struct {
     uint rows;

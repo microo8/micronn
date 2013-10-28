@@ -96,24 +96,13 @@ micronn_matrix* micronn_matrix_dot(cublasHandle_t handle, cublasOperation_t tran
 
 uint micronn_matrix_add_ones(micronn_matrix* w)
 {
-    uint i;
-    cudaError_t cudaStat;
-    float* vals = micronn_matrix_get_vals(w);
+    void micronn_matrix_add_ones_kernel(micronn_matrix * oldw, micronn_matrix * neww);
+    micronn_matrix* new_w = micronn_matrix_alloc(w->rows + 1, w->cols);
+    micronn_matrix_add_ones_kernel(w, new_w);
     cudaFree(w->devPtrvals);
+    w->devPtrvals = new_w->devPtrvals;
     w->rows++;
-    float* new_vals = malloc(sizeof(float) * w->rows * w->cols);
-    for(i = 0; i < w->cols; i++) {
-        memcpy(new_vals + (i * w->rows), vals + (i * (w->rows - 1)), sizeof(float) * (w->rows - 1));
-        new_vals[(i + 1) * w->rows - 1] = 1;
-    }
-    free(vals);
-    cudaStat = cudaMalloc((void**)&w->devPtrvals, sizeof(float) * w->rows * w->cols);
-    if(cudaStat != cudaSuccess) {
-        fprintf(stderr, "device memory allocation failed\n");
-        return 0;
-    }
-    micronn_matrix_set_vals(w, new_vals);
-    free(new_vals);
+    free(new_w);
     return 1;
 };
 
@@ -364,11 +353,9 @@ micronn* micronn_read(FILE* file)
 
 micronn_matrix* micronn_forward(micronn* net, micronn_matrix* w)
 {
-    if(w->rows != net->nin) {
-        if(w->rows - 1 != net->nin) {
-            fprintf(stderr, "Input dimension is incorrect\n");
-            return NULL;
-        }
+    if((w->rows != net->nin) && (w->rows - 1 != net->nin)) {
+        fprintf(stderr, "Input dimension is incorrect\n");
+        return NULL;
     }
     uint i;
     micronn_matrix* tmp;
@@ -487,16 +474,13 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
         if(echo_iters != 0 && i % echo_iters == 0) {
             error = micronn_error(net, inputs, targets, NULL);//a[net->nhidden + 1]);
             diff = micronn_diff(net, inputs, targets, NULL);//a[net->nhidden + 1]);
-            printf("iteration %d\terror: %.10f\tdiff: %d\n", i, error, diff);
+            printf("\x1B[32miteration \x1B[0m%d\t\t\x1B[31merror: \x1B[0m%.10f\t\t\x1B[35mdiff: \x1B[0m%d/%d\n", i, error, diff, inputs->cols);
         }
 
         //last delta = (a[last] - y) * f'(z[last])
         delta[net->nhidden] = micronn_matrix_copy(a[net->nhidden + 1]);
         micronn_matrix_sub(delta[net->nhidden], y);
-        tmp = micronn_matrix_alloc(a[net->nhidden + 1]->rows, a[net->nhidden + 1]->cols);
-        micronn_matrix_deriv_sigmoid(a[net->nhidden + 1], tmp);
-        micronn_matrix_mul(delta[net->nhidden], tmp);
-        micronn_matrix_free(tmp);
+        micronn_matrix_deriv_sigmoid(a[net->nhidden + 1], delta[net->nhidden]);
         //other delta[i] = (W[i])'delta[i+1] * f'(z[i])
         for(j = net->nhidden - 1; j >= 0; j--) {
             delta[j] = micronn_matrix_alloc(net->weights[j + 1]->cols, delta[j + 1]->cols);
@@ -506,14 +490,14 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
                         delta[j + 1]->devPtrvals, delta[j + 1]->rows,
                         &beta, delta[j]->devPtrvals, delta[j]->rows);
             //delta[i] *= f'(z[i+1])
-            //micronn_matrix_deriv_sigmoid(a[j + 1], delta[j]);
+            micronn_matrix_deriv_sigmoid(a[j + 1], delta[j]);
 
-            tmp = micronn_matrix_alloc(a[j + 1]->rows, a[j + 1]->cols);
-            micronn_matrix_deriv_sigmoid(a[j + 1], tmp);
-            micronn_matrix_mul(delta[j], tmp);
-            micronn_matrix_free(tmp);
+            //tmp = micronn_matrix_alloc(a[j + 1]->rows, a[j + 1]->cols);
+            //micronn_matrix_deriv_sigmoid(a[j + 1], tmp);
+            //micronn_matrix_mul(delta[j], tmp);
+            //micronn_matrix_free(tmp);
         }
-        alpha = eta / inputs->cols;
+        alpha = error * eta / inputs->cols;
         //compute grad[i] = delta[i+1](a[i])' + momentum*grad[i] and add to weights[i] -= eta/N*grad[i]
         for(j = net->nhidden; j >= 0; j--) {
             //delete the last row from deltas to have correct size of grad
