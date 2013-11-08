@@ -5,10 +5,8 @@
 #include <time.h>
 #include <math.h>
 #include <float.h>
-#include <cuda.h>
-#include <cuda_runtime.h>
-#include <cublas_v2.h>
-//#include <ini_config.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_blas.h>
 
 #define uint unsigned int
 #define MINWEIGHT -0.2
@@ -16,53 +14,31 @@
 #define block_size 512
 
 typedef struct {
-    uint rows;
-    uint cols;
-    float* devPtrvals;
-} micronn_matrix;
-
-typedef struct {
-    cublasHandle_t handle;
     uint nin;
     uint nout;
     uint nhidden;
     uint* chidden;
 
-    micronn_matrix** weights;
+    gsl_matrix** weights;
 } micronn;
 
-micronn_matrix* micronn_matrix_alloc(uint, uint);
-uint micronn_matrix_free(micronn_matrix*);
-micronn_matrix* micronn_matrix_copy(micronn_matrix*);
-uint micronn_matrix_rand(micronn_matrix*, float, float);
-uint micronn_matrix_write(micronn_matrix*, FILE*);
-micronn_matrix* micronn_matrix_read(FILE*);
-micronn_matrix* micronn_matrix_dot(cublasHandle_t, cublasOperation_t, cublasOperation_t, float, micronn_matrix*, micronn_matrix*);
-uint micronn_matrix_add_ones(micronn_matrix*);
-uint micronn_matrix_remove_last_row(micronn_matrix*);
-float* micronn_matrix_get_vals(micronn_matrix*);
-uint micronn_matrix_set_vals(micronn_matrix*, float*);
-uint micronn_matrix_set_val(micronn_matrix*, float);
-micronn_matrix* micronn_matrix_sigmoid(micronn_matrix*);
-uint micronn_matrix_deriv_sigmoid(micronn_matrix*, micronn_matrix*);
-uint micronn_matrix_add(micronn_matrix*, micronn_matrix*);
-uint micronn_matrix_sub(micronn_matrix*, micronn_matrix*);
-uint micronn_matrix_mul(micronn_matrix*, micronn_matrix*);
-uint micronn_matrix_div(micronn_matrix*, micronn_matrix*);
-uint micronn_matrix_add_scalar(micronn_matrix*, float);
-uint micronn_matrix_sub_scalar(micronn_matrix*, float);
-uint micronn_matrix_mul_scalar(micronn_matrix*, float);
-uint micronn_matrix_div_scalar(micronn_matrix*, float);
-uint micronn_matrix_round(micronn_matrix*);
+uint gsl_matrix_rand(gsl_matrix*, float, float);
+gsl_matrix* gsl_matrix_dot(CBLAS_TRANSPOSE_t, CBLAS_TRANSPOSE_t, float, gsl_matrix*, gsl_matrix*);
+uint gsl_matrix_add_ones(gsl_matrix*);
+uint gsl_matrix_remove_last_row(gsl_matrix*);
+uint gsl_matrix_set_vals(gsl_matrix*, float*);
+gsl_matrix* gsl_matrix_sigmoid(gsl_matrix*);
+uint gsl_matrix_deriv_sigmoid(gsl_matrix*, gsl_matrix*);
+uint gsl_matrix_round(gsl_matrix*);
 
 micronn* micronn_init(uint, uint, uint, ...);
 uint micronn_rand_weights(micronn*, float, float);
 uint micronn_free(micronn*);
 uint micronn_write(micronn*, FILE*);
 micronn* micronn_read(FILE*);
-micronn_matrix* micronn_forward(micronn*, micronn_matrix*);
-micronn_matrix** micronn_forward_all(micronn*, micronn_matrix*);
-float micronn_error(micronn*, micronn_matrix*, micronn_matrix*, micronn_matrix*);
-uint micronn_diff(micronn*, micronn_matrix*, micronn_matrix*, micronn_matrix*);
-uint micronn_train(micronn*, micronn_matrix*, micronn_matrix*, uint, float, float, uint, float, uint);
+gsl_matrix* micronn_forward(micronn*, gsl_matrix*);
+gsl_matrix** micronn_forward_all(micronn*, gsl_matrix*);
+float micronn_error(micronn*, gsl_matrix*, gsl_matrix*, gsl_matrix*);
+uint micronn_diff(micronn*, gsl_matrix*, gsl_matrix*, gsl_matrix*);
+uint micronn_train(micronn*, gsl_matrix*, gsl_matrix*, uint, float, float, uint, float, uint);
 uint micronn_train_from_file(micronn*, const char*);
