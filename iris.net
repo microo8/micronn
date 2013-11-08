@@ -1,103 +1,92 @@
 micro neural network
 ninputs: 4
 noutputs: 3
-nhidden 4
-chidden: 50 20 10 5
+nhidden 1
+chidden: 10
 weight 1:
-rows: 50 cols: 5
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
-nan nan nan nan nan 
+rows: 10 cols: 5
+-9.680053e-02
+-1.061381e-02
+1.618068e-01
+-1.607340e-01
+-5.026540e-02
+4.779114e-02
+-7.345210e-02
+-1.743303e-01
+-1.195691e-01
+1.880583e-01
+-7.334336e-02
+-1.649123e-01
+-1.836561e-01
+6.960206e-02
+-1.143220e-01
+-1.660266e-01
+-1.856119e-02
+-4.749899e-02
+8.135949e-02
+-3.015883e-02
+-1.358687e-01
+1.780212e-01
+1.837305e-01
+-6.386988e-03
+1.583667e-01
+-4.923413e-02
+4.011375e-02
+-4.446277e-02
+6.256683e-02
+-1.747173e-01
+-4.918823e-02
+1.657663e-01
+1.466887e-02
+-8.738148e-02
+-1.949677e-01
+1.644035e-01
+1.604097e-01
+-6.841979e-02
+1.900732e-01
+-1.591594e-01
+-8.036150e-02
+-8.327021e-02
+-1.240717e-01
+-6.401756e-02
+1.863319e-01
+-3.839369e-02
+-3.004421e-02
+-3.222933e-02
+1.141073e-01
+-1.486847e-01
 weight 2:
-rows: 20 cols: 51
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-weight 3:
-rows: 10 cols: 21
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan 
-weight 4:
-rows: 5 cols: 11
-nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan 
-nan nan nan nan nan nan nan nan nan nan nan 
-weight 5:
-rows: 3 cols: 6
-nan nan nan nan nan nan 
-nan nan nan nan nan nan 
-nan nan nan nan nan nan 
+rows: 3 cols: 11
+-9.680053e-02
+-1.061381e-02
+1.618068e-01
+-1.607340e-01
+-5.026540e-02
+4.779114e-02
+-7.345210e-02
+-1.743303e-01
+-1.195691e-01
+1.880583e-01
+-7.334336e-02
+-1.649123e-01
+-1.836561e-01
+6.960206e-02
+-1.143220e-01
+-1.660266e-01
+-1.856119e-02
+-4.749899e-02
+8.135949e-02
+-3.015883e-02
+-1.358687e-01
+1.780212e-01
+1.837305e-01
+-6.386988e-03
+1.583667e-01
+-4.923413e-02
+4.011375e-02
+-4.446277e-02
+6.256683e-02
+-1.747173e-01
+-4.918823e-02
+1.657663e-01
+1.466887e-02

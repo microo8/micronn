@@ -22,6 +22,7 @@ DARWIN = $(strip $(findstring DARWIN, $(OSUPPER)))
 
 # Location of the CUDA Toolkit binaries and libraries
 GCC             ?= gcc
+MPICC             ?= mpicc
 
 # Extra user flags
 EXTRA_NVCCFLAGS ?= 
@@ -64,13 +65,13 @@ all: build
 build: nntest
 
 nntest.o: nntest.c
-	$(GCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< -Wall -O2
+	$(MPICC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< -Wall -O2
 
 micronn.o: micronn.c
-	$(GCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< -Wall -O2
+	$(MPICC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< -Wall -O2
 
 nntest: nntest.o micronn.o
-	$(GCC) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
+	$(MPICC) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
 
 run: build
 	#optirun ./nntest

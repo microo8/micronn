@@ -7,6 +7,7 @@
 #include <float.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
+#include <mpi.h>
 
 #define uint unsigned int
 #define MINWEIGHT -0.2
@@ -41,4 +42,5 @@ gsl_matrix** micronn_forward_all(micronn*, gsl_matrix*);
 double micronn_error(micronn*, gsl_matrix*, gsl_matrix*, gsl_matrix*);
 uint micronn_diff(micronn*, gsl_matrix*, gsl_matrix*, gsl_matrix*);
 uint micronn_train(micronn*, gsl_matrix*, gsl_matrix*, uint, double, double, uint, double, uint);
+uint micronn_train_cluster(const char*, gsl_matrix*, gsl_matrix*, double, double, uint, double, uint);
 uint micronn_train_from_file(micronn*, const char*);
