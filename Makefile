@@ -21,27 +21,11 @@ endif
 DARWIN = $(strip $(findstring DARWIN, $(OSUPPER)))
 
 # Location of the CUDA Toolkit binaries and libraries
-CUDA_PATH       ?= /usr/local/cuda
-CUDA_INC_PATH   ?= $(CUDA_PATH)/include
-CUDA_BIN_PATH   ?= $(CUDA_PATH)/bin
-ifneq ($(DARWIN),)
-  CUDA_LIB_PATH  ?= $(CUDA_PATH)/lib
-else
-  ifeq ($(OS_SIZE),32)
-    CUDA_LIB_PATH  ?= $(CUDA_PATH)/lib
-  else
-    CUDA_LIB_PATH  ?= $(CUDA_PATH)/lib64
-  endif
-endif
-
-# Common binaries
-NVCC            ?= nvcc
 GCC             ?= gcc
-GPP             ?= g++
 
 # Extra user flags
 EXTRA_NVCCFLAGS ?= 
-EXTRA_LDFLAGS   ?= -lm
+EXTRA_LDFLAGS   ?= -lm -lgsl -lgslcblas
 EXTRA_CCFLAGS   ?= 
 
 # CUDA code generation flags
@@ -64,13 +48,6 @@ else
   endif
 endif
 
-# OS-architecture specific flags
-ifeq ($(OS_SIZE),32)
-      NVCCFLAGS := -m32
-else
-      NVCCFLAGS := -m64
-endif
-
 # Debug build flags
 ifeq ($(dbg),1)
       CCFLAGS   += -g
@@ -80,10 +57,6 @@ else
       TARGET    := release
 endif
 
-
-# Common includes and paths for CUDA
-INCLUDES      := -I$(CUDA_INC_PATH)
-LDFLAGS       += -lcublas
 
 # Target rules
 all: build
@@ -96,15 +69,12 @@ nntest.o: nntest.c
 micronn.o: micronn.c
 	$(GCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< -Wall -O2
 
-micronn_kernels.o: micronn_kernels.cu
-	$(NVCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< 
-
-nntest: nntest.o micronn.o micronn_kernels.o
-	$(GPP) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
+nntest: nntest.o micronn.o
+	$(GCC) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
 
 run: build
-	optirun ./nntest
-	#./nntest
+	#optirun ./nntest
+	./nntest
 
 clean:
 	rm -rf nntest *.o

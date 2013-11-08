@@ -3,21 +3,26 @@
 int main(int argc, char** argv)
 {
     FILE* f;
+    size_t size1, size2;
     printf("start\n");
-    micronn* net = micronn_init(784, 10, 4, 1000, 500, 200, 50);
+    micronn* net = micronn_init(4, 3, 1, 10);
     printf("net initialized\n");
-    f = fopen("train_images.data", "r");
-    micronn_matrix* i = micronn_matrix_read(f);
+    f = fopen("input.data", "r");
+    fscanf(f, "rows: %zu cols: %zu\n", &size1, &size2);
+    gsl_matrix* i = gsl_matrix_alloc(size1, size2);
+    gsl_matrix_fscanf(f, i);
     fclose(f);
     printf("inputs loaded\n");
-    f = fopen("train_labels.data", "r");
-    micronn_matrix* o = micronn_matrix_read(f);
+    f = fopen("targets.data", "r");
+    fscanf(f, "rows: %zu cols: %zu\n", &size1, &size2);
+    gsl_matrix* o = gsl_matrix_alloc(size1, size2);
+    gsl_matrix_fscanf(f, o);
     fclose(f);
     printf("targets loaded\n");
 
-    micronn_train(net, i, o, 50, 0.3, 0.1, 0, 0.2, 1000);
-    micronn_matrix_free(i);
-    micronn_matrix_free(o);
+    micronn_train(net, i, o, 50, 0.5, 0.1, 0, 0.01, 10000);
+    gsl_matrix_free(i);
+    gsl_matrix_free(o);
     f = fopen("mnist.net", "w");
     micronn_write(net, f);
     fclose(f);

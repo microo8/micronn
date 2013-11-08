@@ -22,23 +22,23 @@ typedef struct {
     gsl_matrix** weights;
 } micronn;
 
-uint gsl_matrix_rand(gsl_matrix*, float, float);
-gsl_matrix* gsl_matrix_dot(CBLAS_TRANSPOSE_t, CBLAS_TRANSPOSE_t, float, gsl_matrix*, gsl_matrix*);
-uint gsl_matrix_add_ones(gsl_matrix*);
-uint gsl_matrix_remove_last_row(gsl_matrix*);
-uint gsl_matrix_set_vals(gsl_matrix*, float*);
+uint gsl_matrix_rand(gsl_matrix*, double, double);
+gsl_matrix* gsl_matrix_dot(CBLAS_TRANSPOSE_t, CBLAS_TRANSPOSE_t, double, gsl_matrix*, gsl_matrix*);
+uint gsl_matrix_add_ones(gsl_matrix**);
+uint gsl_matrix_remove_last_row(gsl_matrix**);
+uint gsl_matrix_set_vals(gsl_matrix*, double*);
 gsl_matrix* gsl_matrix_sigmoid(gsl_matrix*);
 uint gsl_matrix_deriv_sigmoid(gsl_matrix*, gsl_matrix*);
 uint gsl_matrix_round(gsl_matrix*);
 
 micronn* micronn_init(uint, uint, uint, ...);
-uint micronn_rand_weights(micronn*, float, float);
+uint micronn_rand_weights(micronn*, double, double);
 uint micronn_free(micronn*);
 uint micronn_write(micronn*, FILE*);
 micronn* micronn_read(FILE*);
 gsl_matrix* micronn_forward(micronn*, gsl_matrix*);
 gsl_matrix** micronn_forward_all(micronn*, gsl_matrix*);
-float micronn_error(micronn*, gsl_matrix*, gsl_matrix*, gsl_matrix*);
+double micronn_error(micronn*, gsl_matrix*, gsl_matrix*, gsl_matrix*);
 uint micronn_diff(micronn*, gsl_matrix*, gsl_matrix*, gsl_matrix*);
-uint micronn_train(micronn*, gsl_matrix*, gsl_matrix*, uint, float, float, uint, float, uint);
+uint micronn_train(micronn*, gsl_matrix*, gsl_matrix*, uint, double, double, uint, double, uint);
 uint micronn_train_from_file(micronn*, const char*);
