@@ -392,18 +392,16 @@ uint micronn_train_cluster(const char* net_path, const char* inputs_path, const 
     fclose(file);
 
     uint start, count, rows_count, cols_count;
-    if(rank != 0) {
-        file = fopen(inputs_path, "r");
-        fscanf(file, "rows: %d cols: %d\n", &rows_count, &cols_count);
-        count = cols_count / (size - 1);
-        start = (rank - 1) * count;
-        inputs = gsl_matrix_fread_cols(file, rows_count, cols_count, start, count);
-        fclose(file);
-        file = fopen(targets_path, "r");
-        fscanf(file, "rows: %d cols: %d\n", &rows_count, &cols_count);
-        targets = gsl_matrix_fread_cols(file, rows_count, cols_count, start, count);
-        fclose(file);
-    }
+    file = fopen(inputs_path, "r");
+    fscanf(file, "rows: %d cols: %d\n", &rows_count, &cols_count);
+    count = cols_count / size;
+    start = rank * count;
+    inputs = gsl_matrix_fread_cols(file, rows_count, cols_count, start, count);
+    fclose(file);
+    file = fopen(targets_path, "r");
+    fscanf(file, "rows: %d cols: %d\n", &rows_count, &cols_count);
+    targets = gsl_matrix_fread_cols(file, rows_count, cols_count, start, count);
+    fclose(file);
 
     int j, diff, diff2;
     uint i;
@@ -423,36 +421,26 @@ uint micronn_train_cluster(const char* net_path, const char* inputs_path, const 
         new_grad[i] = gsl_matrix_alloc(net->weights[i]->size1, net->weights[i]->size2);
         gsl_matrix_set_all(grad[i], 0.0);
     }
-    if(rank != 0) {
-        gsl_matrix_add_ones(&inputs);
-        a[0] = inputs;
-        y = targets;
-    }
+    gsl_matrix_add_ones(&inputs);
+    a[0] = inputs;
+    y = targets;
     for(i = 0; (max_iters == 0 || i < max_iters) && error > min_error; i++) {
 
-        if(rank != 0) {
-            //forward and save the outputs of layers
-            for(j = 0; j < net->nhidden + 1; j++) {
-                if(j > 0) {
-                    gsl_matrix_add_ones(&a[j]);
-                }
-                tmp = gsl_matrix_dot(CblasNoTrans, CblasNoTrans, 1.0, net->weights[j], a[j]);
-                //z[j] = tmp;
-                a[j + 1] = gsl_matrix_sigmoid(tmp);
-                gsl_matrix_free(tmp);
+        //forward and save the outputs of layers
+        for(j = 0; j < net->nhidden + 1; j++) {
+            if(j > 0) {
+                gsl_matrix_add_ones(&a[j]);
             }
+            tmp = gsl_matrix_dot(CblasNoTrans, CblasNoTrans, 1.0, net->weights[j], a[j]);
+            //z[j] = tmp;
+            a[j + 1] = gsl_matrix_sigmoid(tmp);
+            gsl_matrix_free(tmp);
         }
 
-        MPI_Barrier(MPI_COMM_WORLD);
         //calculate error
         if(echo_iters != 0 && i % echo_iters == 0) {
-            if(rank == 0) {
-                error = 0;
-                diff = 0;
-            } else {
-                error = micronn_error(net, inputs, targets, NULL);//a[net->nhidden + 1]);
-                diff = micronn_diff(net, inputs, targets, NULL);//a[net->nhidden + 1]);
-            }
+            error = micronn_error(net, inputs, targets, NULL);//a[net->nhidden + 1]);
+            diff = micronn_diff(net, inputs, targets, NULL);//a[net->nhidden + 1]);
             MPI_Allreduce(&error, &error2, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
             MPI_Allreduce(&diff, &diff2, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
             error = error2;
@@ -462,52 +450,48 @@ uint micronn_train_cluster(const char* net_path, const char* inputs_path, const 
             }
         }
 
-        if(rank != 0) {
-            //last delta = (a[last] - y) * f'(z[last])
-            delta[net->nhidden] = gsl_matrix_alloc(a[net->nhidden + 1]->size1, a[net->nhidden + 1]->size2);
-            gsl_matrix_memcpy(delta[net->nhidden], a[net->nhidden + 1]);
-            gsl_matrix_sub(delta[net->nhidden], y);
-            gsl_matrix_deriv_sigmoid(a[net->nhidden + 1], delta[net->nhidden]);
-            //other delta[i] = (W[i])'delta[i+1] * f'(z[i])
-            for(j = net->nhidden - 1; j >= 0; j--) {
-                delta[j] = gsl_matrix_alloc(net->weights[j + 1]->size2, delta[j + 1]->size2);
-                gsl_blas_dgemm(CblasTrans, CblasNoTrans,
-                               alpha, net->weights[j + 1],
-                               delta[j + 1], beta, delta[j]);
-                //delta[i] *= f'(z[i+1])
-                gsl_matrix_deriv_sigmoid(a[j + 1], delta[j]);
-                gsl_matrix_remove_last_row(&delta[j]);
+        //last delta = (a[last] - y) * f'(z[last])
+        delta[net->nhidden] = gsl_matrix_alloc(a[net->nhidden + 1]->size1, a[net->nhidden + 1]->size2);
+        gsl_matrix_memcpy(delta[net->nhidden], a[net->nhidden + 1]);
+        gsl_matrix_sub(delta[net->nhidden], y);
+        gsl_matrix_deriv_sigmoid(a[net->nhidden + 1], delta[net->nhidden]);
+        //other delta[i] = (W[i])'delta[i+1] * f'(z[i])
+        for(j = net->nhidden - 1; j >= 0; j--) {
+            delta[j] = gsl_matrix_alloc(net->weights[j + 1]->size2, delta[j + 1]->size2);
+            gsl_blas_dgemm(CblasTrans, CblasNoTrans,
+                           alpha, net->weights[j + 1],
+                           delta[j + 1], beta, delta[j]);
+            //delta[i] *= f'(z[i+1])
+            gsl_matrix_deriv_sigmoid(a[j + 1], delta[j]);
+            gsl_matrix_remove_last_row(&delta[j]);
 
-                //tmp = gsl_matrix_alloc(a[j + 1]->size1, a[j + 1]->size2);
-                //gsl_matrix_deriv_sigmoid(a[j + 1], tmp);
-                //gsl_matrix_mul(delta[j], tmp);
-                //gsl_matrix_free(tmp);
-            }
-            alpha = error * eta / inputs->size2;
-            //compute grad[i] = delta[i+1](a[i])' + momentum*grad[i] and add to weights[i] -= eta/N*grad[i]
-            for(j = net->nhidden; j >= 0; j--) {
-                //delete the last row from deltas to have correct size of grad
-                gsl_blas_dgemm(CblasNoTrans, CblasTrans,
-                               alpha, delta[j],
-                               a[j], momentum,
-                               grad[j]);
-            }
+            //tmp = gsl_matrix_alloc(a[j + 1]->size1, a[j + 1]->size2);
+            //gsl_matrix_deriv_sigmoid(a[j + 1], tmp);
+            //gsl_matrix_mul(delta[j], tmp);
+            //gsl_matrix_free(tmp);
+        }
+        alpha = error * eta / inputs->size2;
+        //compute grad[i] = delta[i+1](a[i])' + momentum*grad[i] and add to weights[i] -= eta/N*grad[i]
+        for(j = net->nhidden; j >= 0; j--) {
+            //delete the last row from deltas to have correct size of grad
+            gsl_blas_dgemm(CblasNoTrans, CblasTrans,
+                           alpha, delta[j],
+                           a[j], momentum,
+                           grad[j]);
+        }
 
 
-            for(j = 1; j < net->nhidden + 2; j++) {
-                gsl_matrix_free(a[j]);
-            }
-            for(j = 0; j <= net->nhidden; j++) {
-                gsl_matrix_free(delta[j]);
-            }
+        for(j = 1; j < net->nhidden + 2; j++) {
+            gsl_matrix_free(a[j]);
+        }
+        for(j = 0; j <= net->nhidden; j++) {
+            gsl_matrix_free(delta[j]);
         }
         MPI_Barrier(MPI_COMM_WORLD);
         for(j = net->nhidden; j >= 0; j--) {
             MPI_Allreduce(grad[j]->data, new_grad[j]->data, grad[j]->size1 * grad[j]->size2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-            if(rank != 0){ 
-                gsl_matrix_memcpy(grad[j], new_grad[j]);
-                gsl_matrix_sub(net->weights[j], grad[j]);
-            }
+            gsl_matrix_memcpy(grad[j], new_grad[j]);
+            gsl_matrix_sub(net->weights[j], grad[j]);
         }
     }
     for(i = 0; i <= net->nhidden; i++) {
@@ -522,10 +506,9 @@ uint micronn_train_cluster(const char* net_path, const char* inputs_path, const 
         file = fopen(net_path, "w");
         micronn_write(net, file);
         fclose(file);
-    } else {
-        gsl_matrix_free(inputs);
-        gsl_matrix_free(targets);
     }
+    gsl_matrix_free(inputs);
+    gsl_matrix_free(targets);
     micronn_free(net);
 
     return 1;
@@ -538,7 +521,7 @@ gsl_matrix* gsl_matrix_fread_cols(FILE* file, uint rows_count, uint cols_count, 
     gsl_matrix* result = gsl_matrix_alloc(rows_count, count);
     for(i = 0; i < rows_count; i++) {
         for(j = 0; j < cols_count; j++) {
-                fscanf(file, "%lf", &value);
+            fscanf(file, "%lf", &value);
             if(j >= start && j < start + count) {
                 gsl_matrix_set(result, i, j - start, value);
             }
