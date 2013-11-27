@@ -27,7 +27,7 @@ MPICC             ?= mpicc
 # Extra user flags
 EXTRA_NVCCFLAGS ?= 
 EXTRA_LDFLAGS   ?= -lm -lgsl -lgslcblas
-EXTRA_CCFLAGS   ?= 
+EXTRA_CCFLAGS   ?= -Wno-maybe-uninitialized
 
 # CUDA code generation flags
 GENCODE_SM10    := -gencode arch=compute_10,code=sm_10
