@@ -97,7 +97,7 @@ micronn.o: micronn.c
 	$(GCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< -Wall -O2
 
 micronn_kernels.o: micronn_kernels.cu
-	$(NVCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< 
+	$(NVCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(EXTRA_NVCCFLAGS) $(INCLUDES) -o $@ -c $< 
 
 nntest: nntest.o micronn.o micronn_kernels.o
 	$(GPP) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)

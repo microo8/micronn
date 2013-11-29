@@ -1,3 +1,4 @@
+#include <signal.h>
 #include "micronn.h"
 #define NETFILE "mnist.net"
 #define INFILE "train_images.data"
@@ -7,8 +8,28 @@
 //#define INFILE "input.data"
 //#define OUTFILE "targets.data"
 
+micronn* net = NULL;
+void my_handler(int s)
+{
+    printf("Caught signal %d\n", s);
+    if(net != NULL) {
+        FILE* f = fopen(NETFILE, "w");
+        micronn_write(net, f);
+        fclose(f);
+	printf("Net saved\n");
+        micronn_free(net);
+    }
+    exit(1);
+}
+
 int main(int argc, char** argv)
 {
+    struct sigaction sigIntHandler;
+    sigIntHandler.sa_handler = my_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    sigaction(SIGINT, &sigIntHandler, NULL);
+
     FILE* f;
     printf("start\n");
     f = fopen(INFILE, "r");
@@ -19,10 +40,17 @@ int main(int argc, char** argv)
     micronn_matrix* o = micronn_matrix_read(f);
     fclose(f);
     printf("targets loaded\n");
-    micronn* net = micronn_init(i->rows, o->rows, 3, 1000, 500, 20);
-    printf("net initialized\n");
+    if(argc == 1) {
+        net = micronn_init(i->rows, o->rows, 7, 3000, 2000, 1500, 1000, 500, 100, 20);
+        printf("net initialized\n");
+    } else {
+        f = fopen(NETFILE, "r");
+        net = micronn_read(f);
+        fclose(f);
+        printf("net loaded\n");
+    }
 
-    micronn_train(net, i, o, fmax(1, i->cols/100), 0.3, 0.1, 0, 0.2, 1000);
+    micronn_train(net, i, o, fmax(1, i->cols / 100), 0.2, 0.05, 0, 0.2, 100);
     micronn_matrix_free(i);
     micronn_matrix_free(o);
     f = fopen(NETFILE, "w");
