@@ -39,6 +39,7 @@ uint micronn_matrix_rand(micronn_matrix* w, float from, float to)
         vals[i] = ((float)rand() / (float)RAND_MAX) * (to - from) + from;
     }
     micronn_matrix_set_vals(w, vals);
+    free(vals);
     return 1;
 };
 
@@ -76,6 +77,7 @@ micronn_matrix* micronn_matrix_read(FILE* file)
         return NULL;
     }
     micronn_matrix_set_vals(w, vals);
+    free(vals);
     return w;
 };
 
@@ -96,6 +98,15 @@ micronn_matrix* micronn_matrix_dot(cublasHandle_t handle, cublasOperation_t tran
 
 uint micronn_matrix_add_ones(micronn_matrix* w)
 {
+/*
+    void micronn_matrix_add_ones_kernel(micronn_matrix * oldw, micronn_matrix * neww);
+    micronn_matrix* new_w = micronn_matrix_alloc(w->rows + 1, w->cols);
+    micronn_matrix_add_ones_kernel(w, new_w);
+    cudaFree(w->devPtrvals);
+    w->devPtrvals = new_w->devPtrvals;
+    w->rows++;
+    free(new_w);
+    */
     uint i;
     cudaError_t cudaStat;
     float* vals = micronn_matrix_get_vals(w);
