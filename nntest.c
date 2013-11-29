@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     fclose(f);
     printf("targets loaded\n");
 
-    micronn_train(net, i, o, 50, 0.3, 0.1, 0, 0.2, 1000);
+    micronn_train(net, i, o, 0, 0.3, 0.1, 0, 0.2, 1000);
     micronn_matrix_free(i);
     micronn_matrix_free(o);
     f = fopen("mnist.net", "w");

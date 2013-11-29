@@ -96,13 +96,24 @@ micronn_matrix* micronn_matrix_dot(cublasHandle_t handle, cublasOperation_t tran
 
 uint micronn_matrix_add_ones(micronn_matrix* w)
 {
-    void micronn_matrix_add_ones_kernel(micronn_matrix * oldw, micronn_matrix * neww);
-    micronn_matrix* new_w = micronn_matrix_alloc(w->rows + 1, w->cols);
-    micronn_matrix_add_ones_kernel(w, new_w);
+    uint i;
+    cudaError_t cudaStat;
+    float* vals = micronn_matrix_get_vals(w);
     cudaFree(w->devPtrvals);
-    w->devPtrvals = new_w->devPtrvals;
     w->rows++;
-    free(new_w);
+    float* new_vals = malloc(sizeof(float) * w->rows * w->cols);
+    for(i = 0; i < w->cols; i++) {
+        memcpy(new_vals + (i * w->rows), vals + (i * (w->rows - 1)), sizeof(float) * (w->rows - 1));
+        new_vals[(i + 1) * w->rows - 1] = 1;
+    }
+    free(vals);
+    cudaStat = cudaMalloc((void**)&w->devPtrvals, sizeof(float) * w->rows * w->cols);
+    if(cudaStat != cudaSuccess) {
+        fprintf(stderr, "device memory allocation failed\n");
+        return 0;
+    }
+    micronn_matrix_set_vals(w, new_vals);
+    free(new_vals);
     return 1;
 };
 

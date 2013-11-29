@@ -104,18 +104,6 @@ __global__ void round(uint N, float* a)
     }
 }
 
-__global__ void add_ones(uint N, uint rows, float* oldw, float* neww)
-{
-    uint idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if(idx < N) {
-	if((idx+1) % rows == 0){
-	    neww[idx] = 1.0;
-	}else{
-	    neww[idx] = oldw[idx - (idx / rows)];
-	}
-    }
-}
-
 extern "C"
 {
 void micronn_matrix_copy_kernel(micronn_matrix* w, micronn_matrix* v)
@@ -197,9 +185,4 @@ void micronn_matrix_round_kernel(micronn_matrix* w)
     round <<< n_blocks, block_size >>>(w->rows * w->cols, w->devPtrvals);
 }
 
-void micronn_matrix_add_ones_kernel(micronn_matrix* oldw, micronn_matrix* neww)
-{
-    uint n_blocks = (neww->rows * neww->cols) / block_size + ((neww->rows * neww->cols) % block_size == 0 ? 0 : 1);
-    add_ones <<< n_blocks, block_size >>>(neww->rows * neww->cols, neww->rows, oldw->devPtrvals, neww->devPtrvals);
-}
 }
