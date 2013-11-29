@@ -379,17 +379,27 @@ uint micronn_train_from_file(micronn* net, const char* config_filename)
     free(error_list);
     micronn_train(net, inputs, targets, uint batch, double eta, double momentum, uint max_iters, double min_error, uint echo_iters)
 };*/
-uint micronn_train_cluster(const char* file_name, gsl_matrix* inputs, gsl_matrix* targets, double eta, double momentum, uint max_iters, double min_error, uint echo_iters)
+uint micronn_train_cluster(const char* net_path, const char* inputs_path, const char* targets_path, double eta, double momentum, uint max_iters, double min_error, uint echo_iters)
 {
     int rank, size;
     FILE* file;
     char* buffer;
     size_t bufsize;
-    MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    file = fopen(file_name, "r");
+    file = fopen(net_path, "r");
     micronn* net = micronn_read(file);
+    fclose(file);
+    uint start, count, rows_count, cols_count;
+    file = fopen(inpust_path, "r");
+    fscanf(f, "rows: %d cols: %d\n", &rows_count, &cols_count);
+    count = cols_count / size;
+    start = (rank - 1) * count;
+    gsl_matrix* inputs = gsl_matrix_fread_cols(file, rows_count, cols_count, start, count);
+    fclose(file);
+    file = fopen(targets_path, "r");
+    fscanf(f, "rows: %d cols: %d\n", &rows_count, &cols_count);
+    gsl_matrix* targets = gsl_matrix_fread_cols(file, rows_count, cols_count, start, count);
     fclose(file);
 
     int j;
@@ -402,6 +412,7 @@ uint micronn_train_cluster(const char* file_name, gsl_matrix* inputs, gsl_matrix
     gsl_matrix** a = malloc(sizeof(gsl_matrix*) * (net->nhidden + 2));
     //gsl_matrix** z = malloc(sizeof(gsl_matrix*) * (net->nhidden + 1));
     //calloc grad
+
 
 
     for(i = 0; i <= net->nhidden; i++) {
@@ -493,8 +504,8 @@ uint micronn_train_cluster(const char* file_name, gsl_matrix* inputs, gsl_matrix
             file = fmemopen(buffer, bufsize, "r");
             net = micronn_read(file);
             fclose(file);
-            free(buffer);
         }
+        free(buffer);
     }
     for(i = 0; i <= net->nhidden; i++) {
         gsl_matrix_free(grad[i]);
@@ -509,8 +520,26 @@ uint micronn_train_cluster(const char* file_name, gsl_matrix* inputs, gsl_matrix
         micronn_write(net, file);
         fclose(file);
     }
+    gsl_matrix_free(inputs);
+    gsl_matrix_free(targets);
     micronn_free(net);
 
-    MPI_Finalize();
     return 1;
+};
+
+gsl_matrix* gsl_matrix_fread_cols(FILE* file, uint rows_count, uint cols_count, uint start, uint count)
+{
+    uint i, j;
+    double value;
+    gsl_matrix* result = gsl_matrix_alloc(rows_count, count);
+    for(i = 0; i < rows_count; i++) {
+        for(j = 0; j < cols_count; j++) {
+            if(j >= start || j < start + count) {
+                fscanf(file, "%f", &value);
+                printf("%f ", value);
+                gsl_matrix_set(result, i, j - start, value);
+            }
+        }
+    }
+    return result;
 };
