@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     fclose(f);
     printf("targets loaded\n");
     if(argc == 1) {
-        net = micronn_init(i->rows, o->rows, 7, 3000, 2000, 1500, 1000, 500, 100, 20);
+        net = micronn_init(i->rows, o->rows, 3, 100, 50, 10);
         printf("net initialized\n");
     } else {
         f = fopen(NETFILE, "r");
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
         printf("net loaded\n");
     }
 
-    micronn_train(net, i, o, fmax(1, i->cols / 100), 0.2, 0.05, 0, 0.2, 100);
+    micronn_train(net, i, o, 6000, 0.2, 0.1, 0, 0.05, 100);
     micronn_matrix_free(i);
     micronn_matrix_free(o);
     f = fopen(NETFILE, "w");

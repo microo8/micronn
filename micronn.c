@@ -98,15 +98,15 @@ micronn_matrix* micronn_matrix_dot(cublasHandle_t handle, cublasOperation_t tran
 
 uint micronn_matrix_add_ones(micronn_matrix* w)
 {
-/*
-    void micronn_matrix_add_ones_kernel(micronn_matrix * oldw, micronn_matrix * neww);
-    micronn_matrix* new_w = micronn_matrix_alloc(w->rows + 1, w->cols);
-    micronn_matrix_add_ones_kernel(w, new_w);
-    cudaFree(w->devPtrvals);
-    w->devPtrvals = new_w->devPtrvals;
-    w->rows++;
-    free(new_w);
-    */
+    /*
+        void micronn_matrix_add_ones_kernel(micronn_matrix * oldw, micronn_matrix * neww);
+        micronn_matrix* new_w = micronn_matrix_alloc(w->rows + 1, w->cols);
+        micronn_matrix_add_ones_kernel(w, new_w);
+        cudaFree(w->devPtrvals);
+        w->devPtrvals = new_w->devPtrvals;
+        w->rows++;
+        free(new_w);
+        */
     uint i;
     cudaError_t cudaStat;
     float* vals = micronn_matrix_get_vals(w);
@@ -453,13 +453,14 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
 {
     int j;
     uint i, index, diff;
-    float error = DBL_MAX, alpha = 1.0, beta = 0.0;
+    float error = DBL_MAX, alpha = 1.0, beta = 0.0, one = 1.0;
     micronn_matrix* tmp, *y;
     micronn_matrix** delta = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     micronn_matrix** grad = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     micronn_matrix** a = malloc(sizeof(micronn_matrix*) * (net->nhidden + 2));
     //micronn_matrix** z = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     //calloc grad
+    alpha = eta / (batch == 0 ? inputs->cols : batch);
     for(i = 0; i <= net->nhidden; i++) {
         grad[i] = micronn_matrix_alloc(net->weights[i]->rows, net->weights[i]->cols);
         micronn_matrix_set_val(grad[i], 0.0);
@@ -508,18 +509,12 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
             delta[j] = micronn_matrix_alloc(net->weights[j + 1]->cols, delta[j + 1]->cols);
             cublasSgemm(net->handle, CUBLAS_OP_T, CUBLAS_OP_N,
                         net->weights[j + 1]->cols, delta[j + 1]->cols, net->weights[j + 1]->rows,
-                        &alpha, net->weights[j + 1]->devPtrvals, net->weights[j + 1]->rows,
+                        &one, net->weights[j + 1]->devPtrvals, net->weights[j + 1]->rows,
                         delta[j + 1]->devPtrvals, delta[j + 1]->rows,
                         &beta, delta[j]->devPtrvals, delta[j]->rows);
             //delta[i] *= f'(z[i+1])
             micronn_matrix_deriv_sigmoid(a[j + 1], delta[j]);
-
-            //tmp = micronn_matrix_alloc(a[j + 1]->rows, a[j + 1]->cols);
-            //micronn_matrix_deriv_sigmoid(a[j + 1], tmp);
-            //micronn_matrix_mul(delta[j], tmp);
-            //micronn_matrix_free(tmp);
         }
-        alpha = error * eta / inputs->cols;
         //compute grad[i] = delta[i+1](a[i])' + momentum*grad[i] and add to weights[i] -= eta/N*grad[i]
         for(j = net->nhidden; j >= 0; j--) {
             //delete the last row from deltas to have correct size of grad
