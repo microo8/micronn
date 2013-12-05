@@ -4,6 +4,7 @@
 #define INFILE "train_images.data"
 #define OUTFILE "train_labels.data"
 
+
 //#define NETFILE "iris.net"
 //#define INFILE "input.data"
 //#define OUTFILE "targets.data"
@@ -13,7 +14,7 @@ void my_handler(int s)
 {
     printf("Caught signal %d\n", s);
     if(net != NULL) {
-        FILE* f = fopen(NETFILE, "w");
+        FILE* f = fopen("nets/" NETFILE, "w");
         micronn_write(net, f);
         fclose(f);
 	printf("Net saved\n");
@@ -32,28 +33,28 @@ int main(int argc, char** argv)
 
     FILE* f;
     printf("start\n");
-    f = fopen(INFILE, "r");
+    f = fopen("data/" INFILE, "r");
     micronn_matrix* i = micronn_matrix_read(f);
     fclose(f);
     printf("inputs loaded\n");
-    f = fopen(OUTFILE, "r");
+    f = fopen("data/" OUTFILE, "r");
     micronn_matrix* o = micronn_matrix_read(f);
     fclose(f);
     printf("targets loaded\n");
     if(argc == 1) {
-        net = micronn_init(i->rows, o->rows, 3, 100, 50, 10);
+        net = micronn_init(i->rows, o->rows, 4, 500, 100, 100, 100);
         printf("net initialized\n");
     } else {
-        f = fopen(NETFILE, "r");
+        f = fopen("nets/" NETFILE, "r");
         net = micronn_read(f);
         fclose(f);
         printf("net loaded\n");
     }
 
-    micronn_train(net, i, o, 6000, 0.2, 0.1, 0, 0.05, 100);
+    micronn_train(net, i, o, 1000, 0.2, .05, 0, .01, 1000);
     micronn_matrix_free(i);
     micronn_matrix_free(o);
-    f = fopen(NETFILE, "w");
+    f = fopen("nets/" NETFILE, "w");
     micronn_write(net, f);
     fclose(f);
     micronn_free(net);

@@ -460,7 +460,7 @@ uint micronn_train(micronn* net, micronn_matrix* inputs, micronn_matrix* targets
     micronn_matrix** a = malloc(sizeof(micronn_matrix*) * (net->nhidden + 2));
     //micronn_matrix** z = malloc(sizeof(micronn_matrix*) * (net->nhidden + 1));
     //calloc grad
-    alpha = eta / (batch == 0 ? inputs->cols : batch);
+    alpha = 2 * eta / (batch == 0 ? inputs->cols : batch);
     for(i = 0; i <= net->nhidden; i++) {
         grad[i] = micronn_matrix_alloc(net->weights[i]->rows, net->weights[i]->cols);
         micronn_matrix_set_val(grad[i], 0.0);

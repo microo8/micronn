@@ -13,7 +13,7 @@
 #define uint unsigned int
 #define MINWEIGHT -0.2
 #define MAXWEIGHT 0.2
-#define block_size 256
+#define block_size 128
 
 typedef struct {
     uint rows;

@@ -88,24 +88,30 @@ LDFLAGS       += -lcublas
 # Target rules
 all: build
 
-build: nntest
+build: bin/nntesting bin/nntraining
 
-nntest.o: nntest.c
+bin/nntesting.o: nntesting.c
 	$(GCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< -Wall -O2
 
-micronn.o: micronn.c
+bin/nntraining.o: nntraining.c
 	$(GCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< -Wall -O2
 
-micronn_kernels.o: micronn_kernels.cu
+bin/micronn.o: micronn.c
+	$(GCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(INCLUDES) -o $@ -c $< -Wall -O2
+
+bin/micronn_kernels.o: micronn_kernels.cu
 	$(NVCC) $(CCFLAGS) $(EXTRA_CCFLAGS) $(EXTRA_NVCCFLAGS) $(INCLUDES) -o $@ -c $< 
 
-nntest: nntest.o micronn.o micronn_kernels.o
+bin/nntesting: bin/nntesting.o bin/micronn.o bin/micronn_kernels.o
+	$(GPP) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
+
+bin/nntraining: bin/nntraining.o bin/micronn.o bin/micronn_kernels.o
 	$(GPP) $(CCFLAGS) -o $@ $+ $(LDFLAGS) $(EXTRA_LDFLAGS)
 
 run: build
-	optirun ./nntest
-	#./nntest
+	optirun ./bin/nntraining
+	#./nntesting
 
 clean:
-	rm -rf nntest *.o
+	rm -rf bin/*
 
