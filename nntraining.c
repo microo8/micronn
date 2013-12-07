@@ -1,9 +1,8 @@
 #include <signal.h>
 #include "micronn.h"
-#define NETFILE "mnist.net"
-#define INFILE "train_images.data"
-#define OUTFILE "train_labels.data"
-
+#define NETFILE "hand.net"
+#define INFILE "training_images.data"
+#define OUTFILE "training_targets.data"
 
 //#define NETFILE "iris.net"
 //#define INFILE "input.data"
@@ -33,16 +32,16 @@ int main(int argc, char** argv)
 
     FILE* f;
     printf("start\n");
-    f = fopen("data/" INFILE, "r");
+    f = fopen("data/hand_dataset/" INFILE, "r");
     micronn_matrix* i = micronn_matrix_read(f);
     fclose(f);
     printf("inputs loaded\n");
-    f = fopen("data/" OUTFILE, "r");
+    f = fopen("data/hand_dataset/" OUTFILE, "r");
     micronn_matrix* o = micronn_matrix_read(f);
     fclose(f);
     printf("targets loaded\n");
     if(argc == 1) {
-        net = micronn_init(i->rows, o->rows, 4, 500, 100, 100, 100);
+        net = micronn_init(i->rows, o->rows, 2, 1000, 1000);
         printf("net initialized\n");
     } else {
         f = fopen("nets/" NETFILE, "r");
@@ -51,7 +50,7 @@ int main(int argc, char** argv)
         printf("net loaded\n");
     }
 
-    micronn_train(net, i, o, 1000, 0.2, .05, 0, .01, 1000);
+    micronn_train(net, i, o, 100, 0.1, .01, 0, .005, 50);
     micronn_matrix_free(i);
     micronn_matrix_free(o);
     f = fopen("nets/" NETFILE, "w");
